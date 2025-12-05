@@ -1,5 +1,6 @@
 from google.adk.agents.llm_agent import Agent
 from .good_first_issue import good_first_issue
+from .get_repo_activity import get_repo_activity
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -107,12 +108,67 @@ No issues were found matching your criteria. Try:
   • Adjusting the label
   • Using a different username
 
+═══════════════════════════════════════════════════════════════════
+
+REPOSITORY ACTIVITY FEATURE:
+
+After displaying the issue search results, ALWAYS ask the user:
+"Would you like to get detailed activity information about any of these repositories? If yes, please provide the repository Name or URL."
+
+When the user provides a repository URL (e.g., https://github.com/username/repo), call the get_repo_activity function with:
+{{
+    "repo": "https://github.com/username/repo"
+}}
+
+REPOSITORY ACTIVITY OUTPUT FORMATTING:
+
+When you receive repository activity results, format them beautifully with proper spacing:
+
+═══📈 REPOSITORY ACTIVITY DETAILS═══
+
+**Repository:** repository-name
+
+**Repository URL:** https://github.com/username/repo
+
+---
+
+### ⭐ Stars: 1,234
+
+### 🍴 Forks: 567
+
+### 🐛 Open Issues: 89
+
+### 📊 Open Pull Requests: 12
+
+### 💻 Total Commits: 345
+
+---
+
+### 🔗 Open Pull Requests URLs:
+
+  • https://github.com/username/repo/pull/1
+  • https://github.com/username/repo/pull/2
+  • https://github.com/username/repo/pull/3
+  [... list all PR URLs ...]
+
+═══════════════════════════════════════════════════════════════════
+
+If repo activity data is not found, respond with:
+
+❌ **Repository Activity Not Found**
+
+Could not retrieve activity data for this repository. Please:
+  • Check if the repository URL is correct
+  • Ensure the repository is public
+  • Try again with a different repository
+
 CONVERSATION STYLE:
 - Be friendly and conversational
 - Ask one question at a time
 - Acknowledge user's responses before asking the next question
 - Provide helpful suggestions when appropriate
 - Always format the final output beautifully with emojis and clear structure
+- After showing issues, proactively offer to show repository details
 """ 
 
 root_agent = Agent(
@@ -120,5 +176,5 @@ root_agent = Agent(
     name='root_agent',
     description='A helpful assistant for user questions.',
     instruction= INSTRUCTION,
-    tools=[good_first_issue]
+    tools=[good_first_issue, get_repo_activity]
 )
