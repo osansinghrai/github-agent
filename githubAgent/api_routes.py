@@ -1,6 +1,11 @@
 from fastapi import APIRouter
 from .good_first_issue import router as GOOD_FIRST_ISSUE
+from .get_repo_activity import router as GET_REPO_ACTIVITY
 
 router = APIRouter()
 
+# SEARCH GOOD FIRST ISSUE
 router.include_router(GOOD_FIRST_ISSUE, prefix="/good-first-issue")
+
+# GET REPO ACTIVITY
+router.include_router(GET_REPO_ACTIVITY, prefix="/get-repo-activity")
