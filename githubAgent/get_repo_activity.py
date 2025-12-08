@@ -15,9 +15,12 @@ class GetRepoActivityResult(BaseModel):
     stars: int
     forks: int
     open_issues: int
-    prs_open_url: int
+    issues_url: list[str]
+    issues_number: list[int]
+    open_prs: int
     prs_url: list[str]
     total_commits: int
+    commits_url: list[str]
 
 GITHUB_API_URL = "https://api.github.com"   
 
@@ -47,6 +50,18 @@ def get_repo_activity(request: getRepoActivityRequest):
         COMMITS_URL = f"{url}/commits"
         COMMITS_URL_RESPONSE = requests.get(COMMITS_URL, headers=headers)
         COMMITS_DATA = COMMITS_URL_RESPONSE.json()
+        COMMITS_URLS = [data.get("html_url") for data in COMMITS_DATA]
+
+        ISSUES_URL = f"{url}/issues"
+        ISSUES_URL_RESPONSE = requests.get(ISSUES_URL, headers=headers)
+        ISSUES_URL_DATA = ISSUES_URL_RESPONSE.json()
+        ISSUES_URLS = [data.get("html_url") for data in ISSUES_URL_DATA]
+        ISSUES_URL_FILTERED = [url for url in ISSUES_URLS if "/issues" in url]
+        ISSUES_NUMBERS = []
+        for url in ISSUES_URL_FILTERED:
+            match = re.search(r"/issues/(\d+)", url)
+            if match:
+                ISSUES_NUMBERS.append(int(match.group(1)))
 
         results = []
 
@@ -54,10 +69,13 @@ def get_repo_activity(request: getRepoActivityRequest):
             GetRepoActivityResult(
                 stars = repo_data.get("stargazers_count"),
                 forks = repo_data.get("forks_count"),
-                open_issues = repo_data.get("open_issues_count"),
-                total_commits = len(COMMITS_DATA),
-                prs_open_url = len(PULL_REQUESTS_URL_DATA),
-                prs_url = PRS_URLS
+                open_issues = len(ISSUES_URL_FILTERED),
+                issues_url = ISSUES_URL_FILTERED,
+                issues_number = ISSUES_NUMBERS,
+                open_prs = len(PULL_REQUESTS_URL_DATA),
+                prs_url = PRS_URLS,
+                total_commits = len(COMMITS_URLS),
+                commits_url = COMMITS_URLS
             )
         )
 
@@ -81,6 +99,7 @@ def get_repo_activity(request: getRepoActivityRequest):
     except Exception as err:
         return {
             "status_code": 500,
+            "count": 0,
             "message": f"Error occurred: {str(err)}",
             "results": []
         }

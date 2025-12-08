@@ -37,9 +37,6 @@ def good_first_issue(request: GoodFirstIssueRequest):
         limit = request.limit or 10
         username = request.username or GITHUB_USERNAME
 
-        print(f"Username: {username}")
-        print(f"Language: {language}")
-
         if not GITHUB_USERNAME or not GITHUB_TOKEN:
             return {
                 "status_code": 400,
